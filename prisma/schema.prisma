@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum MaterialSourceType {
+  SHARED
+  TEACHER_OWNED
+}
+
+model Teacher {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  materials             Material[]
+  materialPermissions   TeacherMaterialPermission[]
+  students              Student[]
+  tests                 Test[]
+}
+
+model Student {
+  id          Int      @id @default(autoincrement())
+  teacherId   Int
+  name        String
+  publicToken String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher     Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  permissions StudentMaterialPermission[]
+  tests       Test[]
+
+  @@index([teacherId])
+}
+
+model Material {
+  id         Int                @id @default(autoincrement())
+  name       String
+  sourceType MaterialSourceType
+  teacherId  Int?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  teacher              Teacher?                    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  words                EnglishWord[]
+  teacherPermissions  TeacherMaterialPermission[]
+  studentPermissions  StudentMaterialPermission[]
+
+  @@index([teacherId])
+  @@index([sourceType])
+}
+
+model EnglishWord {
+  id         Int      @id @default(autoincrement())
+  materialId Int
+  number     Int
+  word       String
+  meaning    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  material       Material       @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  testQuestions  TestQuestion[]
+
+  @@unique([materialId, number])
+  @@index([materialId, number])
+}
+
+model TeacherMaterialPermission {
+  id         Int      @id @default(autoincrement())
+  teacherId  Int
+  materialId Int
+  createdAt  DateTime @default(now())
+
+  teacher  Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, materialId])
+  @@index([materialId])
+}
+
+model StudentMaterialPermission {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  materialId Int
+  startNumber Int
+  endNumber   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, materialId, startNumber, endNumber])
+  @@index([studentId, materialId])
+}
+
+model Test {
+  id        Int      @id @default(autoincrement())
+  teacherId Int
+  studentId Int
+  questionCount Int
+  createdAt DateTime @default(now())
+
+  teacher   Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  student   Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  questions TestQuestion[]
+
+  @@index([teacherId])
+  @@index([studentId])
+}
+
+model TestQuestion {
+  id          Int      @id @default(autoincrement())
+  testId      Int
+  englishWordId Int
+  questionNumber Int
+
+  test        Test        @relation(fields: [testId], references: [id], onDelete: Cascade)
+  englishWord EnglishWord @relation(fields: [englishWordId], references: [id], onDelete: Cascade)
+  answer      TestAnswer?
+
+  @@unique([testId, questionNumber])
+  @@unique([testId, englishWordId])
+  @@index([englishWordId])
+}
+
+model TestAnswer {
+  id             Int      @id @default(autoincrement())
+  testQuestionId Int      @unique
+  answer         String
+  isCorrect      Boolean
+  gradingReason  String?
+  createdAt      DateTime @default(now())
+
+  testQuestion TestQuestion @relation(fields: [testQuestionId], references: [id], onDelete: Cascade)
+}
