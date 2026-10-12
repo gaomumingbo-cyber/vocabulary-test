@@ -78,6 +78,8 @@ type GradingResult = {
   index: number;
   correct: boolean;
   reason: string;
+  userAnswer?: string;
+  correctMeaning?: string;
 };
 
 export default function EnglishTestPage() {

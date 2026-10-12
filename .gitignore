@@ -52,3 +52,12 @@ next-env.d.ts
 /.claude/
 /.cursor/
 /.devin/
+.vercel
+
+# Local database migration files
+sqlite-export.json
+.env.vercel
+prisma/schema.prisma.backup
+
+scripts/export-sqlite.cjs
+scripts/import-sqlite.cjs
