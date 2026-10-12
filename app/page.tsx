@@ -115,7 +115,7 @@ export default function Home() {
                 className="mt-5 inline-flex items-center gap-2 border-b border-[#8fa18f] pb-1 text-sm text-[#315640] transition-colors hover:border-[#315640]"
               >
                 Lingnosisについて
-                <span aria-hidden="true">↗</span>
+                <span aria-hidden="true">↗︎</span>
               </a>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function Home() {
                       aria-hidden="true"
                       className="text-lg text-[#718174] transition-transform group-hover:translate-x-1 group-hover:text-[#315640]"
                     >
-                      ↗
+                      ↗︎
                     </span>
                   ) : (
                     <span className="text-[10px] tracking-wider text-[#858b80]">
