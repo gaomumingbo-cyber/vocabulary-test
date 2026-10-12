@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 
 const gradingMode = process.env.ENGLISH_GRADING_MODE ?? "mock";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 export async function POST(request: Request) {
   try {
@@ -100,10 +100,19 @@ export async function POST(request: Request) {
       });
     }
 
+    
     // =========================
     // AI採点
     // =========================
+    if (!openai) {
+      return NextResponse.json(
+        { error: "AI採点にはOPENAI_API_KEYの設定が必要です。" },
+        { status: 500 }
+      );
+    }
+
     const response = await openai.responses.create({
+
       model: "gpt-5-mini",
       input: [
         {
